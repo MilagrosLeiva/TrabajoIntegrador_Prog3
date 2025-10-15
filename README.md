@@ -3,9 +3,13 @@ Api rest para la gestión de reservas de salones de cumpleaños.
 
 # Estructura del archivo .env
 PUERTO=3000
+
 HOST=localhost
+
 USER=usuario
+
 DATABASE=nombre_bd
+
 PASSWORD = constraseña
 
 # Endpoints de salones 
