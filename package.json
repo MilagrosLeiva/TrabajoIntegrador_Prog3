@@ -1,0 +1,17 @@
+{
+  "name": "app-reservas",
+  "version": "1.0.0",
+  "description": "aplicacion de reservas salones de cumpleaños",
+  "main": "reservas.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "des": "node --watch reservas.js"
+  },
+  "author": "milagros leiva",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "mysql2": "^3.15.2"
+  }
+}
