@@ -2,6 +2,7 @@ import { conexion } from "./conexion.js";
 
 export default class Servicios {
 
+    
 
     
     buscarTodos = async () => {
@@ -10,6 +11,10 @@ export default class Servicios {
         return servicios;
     }
 
+
+
+
+
     buscarPorId = async (id) => {
         const sql = 'SELECT * FROM servicios WHERE servicio_id = ? AND activo = 1';
         const [servicio] = await conexion.execute(sql, [id]);
@@ -17,38 +22,40 @@ export default class Servicios {
     }
 
 
+
+
+
     crear = async (datos) => {
         const sql = `
             INSERT INTO servicios (descripcion, importe, activo, creado, modificado)
             VALUES (?, ?, 1, NOW(), NOW())
         `;
-
         const [resultado] = await conexion.execute(sql, [
             datos.descripcion,
             datos.importe
         ]);
-
         return resultado;
     }
+
+    
+
 
 
     actualizar = async (id, datos) => {
         const sql = `
-            UPDATE servicios SET 
-                descripcion = ?,  
-                importe = ?,
-                modificado = NOW()
+            UPDATE servicios
+            SET descripcion = ?, importe = ?, modificado = NOW()
             WHERE servicio_id = ? AND activo = 1
         `;
-
         const [resultado] = await conexion.execute(sql, [
             datos.descripcion,
             datos.importe,
             id
         ]);
-
         return resultado;
     }
+
+
 
 
     eliminar = async (id) => {

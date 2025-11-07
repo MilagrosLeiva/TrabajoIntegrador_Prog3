@@ -1,9 +1,13 @@
-import mysql from 'mysql2/promise';
+import mysql from "mysql2/promise";
 process.loadEnvFile();
 
-export const conexion = await mysql.createConnection({
+
+export const conexion = mysql.createPool({
     host: process.env.HOST,
     user: process.env.USER,
+    password: process.env.PASSWORD,
     database: process.env.DATABASE,
-    password: process.env.PASSWORD  
-});
+    waitForConnections: true,
+    connectionLimit: 10, 
+    queueLimit: 0
+    });

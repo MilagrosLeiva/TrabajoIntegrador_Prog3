@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Usuario</title>
+    <style>
+        body {
+        margin: 0;
+        height: 100vh;
+        background: linear-gradient(135deg, #7b2ff7, #1a1aff);
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        }
+
+        .form-container {
+
+        background-color: rgba(255, 255, 255, 0.15);
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        width: 320px;
+        text-align: center;
+        backdrop-filter: blur(6px);
+
+        }
+
+        h2 {
+
+        margin-bottom: 20px;
+        font-weight: 600;
+
+        }
+
+
+
+
+        label {
+
+        display: block;
+        margin-bottom: 5px;
+        text-align: left;
+        color: #e0e0e0;
+        font-size: 14px;
+        }
+
+
+
+
+        input {
+
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        }
+
+
+
+
+        button {
+        background-color: #fff;
+        color: #5a1aff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s;
+        font-weight: 600;
+        }
+
+
+
+
+        button:hover {
+        background-color: #d6c2f6;
+        }
+
+        .mensaje {
+        margin-top: 15px;
+        font-size: 14px;
+        }
+    </style>
+    </head>
+    <body>
+
+
+
+
+    <div class="form-container">
+            <h2>Registrate</h2>
+
+
+            <form id="formRegistro">
+                <label>Nombre:</label>
+                <input type="text" name="nombre" required />
+
+                <label>Apellido:</label>
+                <input type="text" name="apellido" required />
+
+                <label>Email:</label>
+                <input type="email" name="nombre_usuario" required />
+
+                <label>Contraseña:</label>
+                <input type="password" name="contrasenia" required />
+
+                <button type="submit">Registrarme</button>
+            </form>
+
+            <div class="mensaje" id="mensaje"></div>
+
+    </div>
+
+
+
+
+
+    <script>
+        document.getElementById("formRegistro").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const datos = Object.fromEntries(new FormData(e.target));
+
+        const respuesta = await fetch("/api/v1/registro", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datos),
+        });
+
+        const resultado = await respuesta.json();
+        const msg = document.getElementById("mensaje");
+        msg.textContent = resultado.mensaje;
+        msg.style.color = resultado.estado ? "#90ee90" : "#ff8080";
+        });
+    </script>
+
+
+
+
+
+    </body>
+
+
+    </html>
