@@ -91,4 +91,31 @@ export default class UsuariosGestion {
         const [resultado] = await conexion.execute(sql, [id]);
         return resultado;
     }
+
+
+    actualizarPerfil = async (id, datos) => {
+    const sql = `
+        UPDATE usuarios
+        SET 
+            nombre = COALESCE(?, nombre),
+            apellido = COALESCE(?, apellido),
+            nombre_usuario = COALESCE(?, nombre_usuario),
+            celular = COALESCE(?, celular),
+            foto = COALESCE(?, foto),
+            modificado = NOW()
+        WHERE usuario_id = ? AND activo = 1
+    `;
+
+    const [resultado] = await conexion.execute(sql, [
+        datos.nombre || null,
+        datos.apellido || null,
+        datos.nombre_usuario || null,
+        datos.celular || null,
+        datos.foto || null,
+        id
+    ]);
+
+    return resultado;
+};
+
 }

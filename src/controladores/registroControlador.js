@@ -9,7 +9,7 @@ export default class RegistroControlador {
 
     registrar = async (req, res) => {
         try {
-        const nuevo = await this.servicio.registrarCliente(req.body);
+        const nuevo = await this.servicio.registrar(req.body);
 
         res.status(201).json({
             estado: true,
@@ -19,7 +19,7 @@ export default class RegistroControlador {
         } catch (error) {
         res.status(error.status || 500).json({
             estado: false,
-            mensaje: error.mensaje || "Error al intentar registrarase ",
+            mensaje: error.mensaje || "Error al intentar registrarse ",
         });
         }
     };

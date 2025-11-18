@@ -10,10 +10,9 @@ import { router as v1ServiciosRutas } from './src/rutas/serviciosRutas.js';
 import { router as v1TurnosRutas } from './src/rutas/turnosRutas.js';
 import { router as v1UsuariosRutas } from './src/rutas/usuariosRutas.js';
 import { router as v1ReservasRutas } from "./src/rutas/reservasRutas.js";
-import { router as reportesRutas } from "./src/rutas/reportesRutas.js";
-import { router as estadisticasRutas } from "./src/rutas/estadisticasRutas.js";
 import { router as registroRutas } from "./src/rutas/registroRutas.js";
 import { swaggerDocs, swaggerUi } from "./swagger.js";
+import cors from "cors";
 
 
 
@@ -22,7 +21,7 @@ const app = express();
 
 
 
-
+app.use(cors());
 app.use(express.json());
 passport.use(estrategia);
 passport.use(validacion);
@@ -51,8 +50,6 @@ app.use('/api/v1/servicios', v1ServiciosRutas);
 app.use('/api/v1/turnos', v1TurnosRutas);
 app.use('/api/v1/usuarios', v1UsuariosRutas);
 app.use("/api/v1/reservas", v1ReservasRutas);
-app.use("/api/v1/reportes", reportesRutas);
-app.use("/api/v1/estadisticas", estadisticasRutas);
 app.use("/api/v1/registro", registroRutas);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 

@@ -5,6 +5,10 @@ import autorizarUsuarios from "../middlewares/autorizarUsuarios.js";
 import { validarCampos } from "../middlewares/validarCampos.js";
 import { validarUsuario } from "../validaciones/usuariosValidaciones.js";
 import { cache, limpiarCache } from "../middlewares/cacheMiddleware.js";
+import { upload } from "../config/multer.js";
+
+
+
 
 const controlador = new UsuariosControlador();
 const router = express.Router();
@@ -309,15 +313,74 @@ const router = express.Router();
  *       500:
  *         description: Error al eliminar usuario
  */
-
+/**
+ * @swagger
+ * /usuarios/modificarPerfil:
+ *   put:
+ *     summary: Modificar el perfil del usuario autenticado
+ *     description: >
+ *       Permite que el usuario logueado actualice sus propios datos (nombre, apellido, nombre de usuario, celular y foto).
+ *       Esta operación utiliza **multipart/form-data** para permitir el envío de una imagen.
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 example: "Miriam"
+ *               apellido:
+ *                 type: string
+ *                 example: "Gomez"
+ *               nombre_usuario:
+ *                 type: string
+ *                 example: "mgomez@correo.com"
+ *               celular:
+ *                 type: string
+ *                 example: "341748596"
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *                 description: Imagen de perfil (opcional)
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 estado:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Perfil actualizado correctamente"
+ *       400:
+ *         description: Error en los datos enviados
+ *       401:
+ *         description: Token inválido
+ *       500:
+ *         description: Error interno del servidor
+ */
 
 
 
 
 
 router.use(passport.authenticate("jwt", { session: false }));
+
+
+
+
 router.get("/", autorizarUsuarios([1]), cache("30 minutes"), controlador.buscarTodos);
 router.get("/clientes", autorizarUsuarios([1, 2]), cache("30 minutes"), controlador.buscarClientes);
+router.put("/modificarPerfil", upload.single("foto"), controlador.modificarPerfil);
 router.get("/:id", autorizarUsuarios([1]), controlador.buscarPorId);
 router.post("/", autorizarUsuarios([1]), validarUsuario, validarCampos, limpiarCache, controlador.crear);
 router.put("/:id", autorizarUsuarios([1]), validarUsuario, validarCampos, limpiarCache, controlador.actualizar);

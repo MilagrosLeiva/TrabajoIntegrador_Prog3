@@ -174,42 +174,18 @@ const controlador = new ReservasControlador();
 
 /**
  * @swagger
- * /reservas/mias:
- *   get:
- *     summary: Ver las reservas del cliente logueado
- *     tags: [Reservas]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Lista de reservas del cliente autenticado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 estado:
- *                   type: boolean
- *                   example: true
- *                 datos:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/ReservaResponse'
- *       401:
- *         description: No autorizado o token inválido
- */
-
-/**
- * @swagger
  * /reservas:
  *   get:
- *     summary: Obtener todas las reservas (Admin o Empleado)
+ *     summary: Obtener reservas según el rol del usuario
+ *     description: >
+ *       - **Cliente (3)** → devuelve solo sus propias reservas.  
+ *       - **Empleado (2) o Admin (1)** → devuelve todas las reservas activas.
  *     tags: [Reservas]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lista completa de reservas activas
+ *         description: Lista de reservas filtrada según permisos del usuario.
  *         content:
  *           application/json:
  *             schema:
@@ -220,9 +196,9 @@ const controlador = new ReservasControlador();
  *                 datos:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/ReservaResponse'
- *       403:
- *         description: Rol no autorizado
+ *                     $ref: "#/components/schemas/ReservaResponse"
+ *       401:
+ *         description: Token inválido o ausente
  *       500:
  *         description: Error interno del servidor
  */
@@ -345,8 +321,93 @@ const controlador = new ReservasControlador();
  *         description: Error interno del servidor
  */
 
+/**
+ * @swagger
+ * /reservas/informe:
+ *   get:
+ *     summary: Generar informe de reservas en PDF o CSV
+ *     description: >
+ *       Genera un informe completo de reservas y lo devuelve en formato PDF o CSV.
+ *       El formato debe enviarse mediante el query param `?formato=pdf` o `?formato=csv`.
+ *       Solo los administradores pueden descargar informes.
+ *     tags: [Reservas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: formato
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [pdf, csv]
+ *         description: Formato del informe a generar.
+ *         example: pdf
+ *     responses:
+ *       200:
+ *         description: Informe generado con éxito (archivo PDF o CSV)
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Formato inválido (usar ?formato=pdf o ?formato=csv)
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno del servidor
+ */
 
-
+/**
+ * @swagger
+ * /reservas/estadisticas:
+ *   get:
+ *     summary: Obtener estadísticas mensuales de reservas
+ *     description: >
+ *       Devuelve un listado de meses con la cantidad de reservas activas y el total recaudado.
+ *       *Solo accesible para Administradores*
+ *     tags: [Reservas]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Estadísticas generadas correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 estado:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Estadísticas generadas correctamente"
+ *                 datos:
+ *                   type: array
+ *                   description: Lista de estadísticas por mes
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       mes:
+ *                         type: string
+ *                         example: "2025-12"
+ *                       reservas_por_mes:
+ *                         type: integer
+ *                         example: 14
+ *                       total_recaudado:
+ *                         type: number
+ *                         format: float
+ *                         example: 65000.00
+ *       401:
+ *         description: No autorizado 
+ *       500:
+ *         description: Error interno del servidor
+ */
 
 
 
@@ -359,8 +420,10 @@ router.use(passport.authenticate("jwt", { session: false }));
 
 
 
-router.get("/mias", autorizarUsuarios([3]), controlador.buscarMisReservas);
-router.get("/", autorizarUsuarios([1, 2]), controlador.buscarTodos);
+
+router.get("/", autorizarUsuarios([1, 2, 3]), controlador.listarSegunRol);
+router.get("/informe", autorizarUsuarios([1]), controlador.informe);
+router.get("/estadisticas", autorizarUsuarios([1]), controlador.estadisticas);
 router.get("/:id", autorizarUsuarios([1, 2]), controlador.buscarPorId);
 router.post("/", autorizarUsuarios([1, 3]), validarReserva, validarCampos, controlador.crear);
 router.put('/:id', autorizarUsuarios([1]), validarReserva, validarCampos, controlador.actualizar);

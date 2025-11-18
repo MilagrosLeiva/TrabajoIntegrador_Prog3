@@ -2,12 +2,18 @@ import { conexion } from "../db/conexion.js";
 import Reservas from "../db/reservas.js";
 import ReservasServicios from "../db/reservas_servicios.js";
 import NotificacionesService from "./notificacionesServicio.js";
+import InformeServicio from "./informesServicio.js";
+
+
+
+
 
 export default class ReservasServicio {
     constructor() {
         this.reservas = new Reservas();
         this.reservasServicios = new ReservasServicios();
         this.notificaciones = new NotificacionesService();
+        this.informes = new InformeServicio();
     }
 
     buscarTodos = () => this.reservas.buscarTodos();
@@ -140,5 +146,33 @@ export default class ReservasServicio {
         } catch (error) {
             throw { estado: false, mensaje: "Error al eliminar la reserva", status: 500 };
         }
+    }
+
+    async generarInforme(formato) {
+        const datos = await this.reservas.buscarDatosReporteCsv();
+
+        if (formato === "csv") {
+            const path = await this.informes.informeReservasCsv(datos);
+            return {
+                headers: {
+                    "Content-Type": "text/csv",
+                    "Content-Disposition": 'attachment; filename="reservas.csv"'
+                },
+                path
+            };
+        }
+
+        if (formato === "pdf") {
+            const buffer = await this.informes.informeReservasPdf(datos);
+            return {
+                headers: {
+                    "Content-Type": "application/pdf",
+                    "Content-Disposition": 'inline; filename="reservas.pdf"'
+                },
+                buffer
+            };
+        }
+
+        throw { status: 400, mensaje: "Formato no válido" };
     }
 }

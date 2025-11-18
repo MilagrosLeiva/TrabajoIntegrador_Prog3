@@ -2,4 +2,4 @@
 .env
 access.log
 src/reportes
-
+public/uploads

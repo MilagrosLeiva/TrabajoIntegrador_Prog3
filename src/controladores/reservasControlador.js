@@ -1,52 +1,43 @@
     import ReservasServicio from "../servicios/reservasServicio.js";
+    import EstadisticasServicio from "../servicios/estadisticasServicio.js";
+    
+    const formatosPermitidos = ['pdf', 'csv'];
+
 
     export default class ReservasControlador {
     constructor() {
         this.reservasServicio = new ReservasServicio();
+        this.estadisticasServicio = new EstadisticasServicio();
     }
 
 
-    //RESERVAS PROPIAS DE UN CLIENTE
-
-
-
-    buscarMisReservas = async (req, res) => {
+    //RESERVAS segun rol
+    listarSegunRol = async (req, res) => {
         try {
-        const usuario_id = req.user.usuario_id;
-        const reservas = await this.reservasServicio.buscarPorCliente(usuario_id);
+            const { tipo_usuario, usuario_id } = req.user;
+            let reservas;
 
-        res.status(200).json({
-            estado: true,
-            datos: reservas,
-        });
+            if (tipo_usuario === 3) {
+                reservas = await this.reservasServicio.buscarPorCliente(usuario_id);
+            } else {
+                
+                reservas = await this.reservasServicio.buscarTodos();
+            }
+
+            res.status(200).json({
+                estado: true,
+                datos: reservas,
+            });
+
         } catch (err) {
-        console.error("Error al listar mis reservas:", err);
-        res.status(500).json({
-            estado: false,
-            mensaje: "Error interno del servidor",
-        });
+            console.error("Error al listar reservas:", err);
+            res.status(500).json({
+                estado: false,
+                mensaje: "Error interno del servidor",
+            });
         }
     };
 
-    
-
-
-    buscarTodos = async (req, res) => {
-        try {
-        const reservas = await this.reservasServicio.buscarTodos();
-
-        res.status(200).json({
-            estado: true,
-            datos: reservas,
-        });
-        } catch (err) {
-        console.error("Error al listar todas las reservas:", err);
-        res.status(500).json({
-            estado: false,
-            mensaje: "Error interno del servidor",
-        });
-        }
-    };
 
 
 
@@ -76,37 +67,48 @@
         }
     };
 
-    
+
 
 
     crear = async (req, res) => {
         try {
-        const usuario_id = req.user.usuario_id;
-        const nombre_usuario = req.user.nombre_usuario; 
-        const datosReserva = { ...req.body, usuario_id, nombre_usuario };
-        const resultado = await this.reservasServicio.crear(datosReserva);
+            const tipo = req.user.tipo_usuario;
 
+            let usuario_id;
 
+            if (tipo === 3) {
+                usuario_id = req.user.usuario_id;
+            } else if (tipo === 1) {
+            
+                usuario_id = req.body.usuario_id;
+            }
 
-        if (!resultado.estado) {
-            return res.status(resultado.status || 500).json({
-            estado: false,
-            mensaje: resultado.mensaje || "error interno del servidor",
+            const datosReserva = {
+                ...req.body,
+                usuario_id
+            };
+
+            const resultado = await this.reservasServicio.crear(datosReserva);
+
+            if (!resultado.estado) {
+                return res.status(resultado.status || 500).json({
+                    estado: false,
+                    mensaje: resultado.mensaje || "error interno del servidor",
+                });
+            }
+
+            res.status(201).json({
+                estado: true,
+                mensaje: resultado.mensaje || "Reserva creada y notificada con éxito",
+                datos: resultado.datos,
             });
-        }
-
-        res.status(201).json({
-            estado: true,
-            mensaje: resultado.mensaje || "Reserva creada y notificada con exito ",
-            datos: resultado.datos,
-        });
 
         } catch (err) {
-        console.error(" Error en POST /reservas:", err);
-        res.status(err.status || 500).json({
-            estado: false,
-            mensaje: err.mensaje || "Error interno del servidor",
-        });
+            console.error("Error en POST /reservas:", err);
+            res.status(err.status || 500).json({
+                estado: false,
+                mensaje: err.mensaje || "Error interno del servidor",
+            });
         }
     };
 
@@ -166,4 +168,57 @@
         });
         }
     };
+
+
+    informe = async (req, res) => {
+        try {
+            const formato = req.query.formato;
+
+            if (!formato || !formatosPermitidos.includes(formato)) {
+                return res.status(400).json({
+                    estado: false,
+                    mensaje: "Formato inválido (usa ?formato=csv o ?formato=pdf)"
+                });
+            }
+
+            const resultado = await this.reservasServicio.generarInforme(formato);
+
+            res.set(resultado.headers);
+
+            if (resultado.buffer) {
+
+                return res.status(200).end(resultado.buffer);
+            }
+
+            if (resultado.path) {
+
+                return res.download(resultado.path);
+            }
+
+        } catch (err) {
+            console.log("Error generando informe:", err);
+            res.status(500).json({
+                estado: false,
+                mensaje: "Error interno del servidor"
+            });
+        }
+    };
+
+    estadisticas = async (req, res) => {
+        try {
+            const resultado = await this.estadisticasServicio.obtenerEstadisticas();
+
+            res.json(resultado);
+
+        } catch (error) {
+            console.error("Error obteniendo estadísticas:", error);
+            res.status(500).json({
+                estado: false,
+                mensaje: "Error interno al obtener las estadísticas"
+            });
+        }
+    };
+
+
+    
     }

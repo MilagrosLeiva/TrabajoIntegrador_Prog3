@@ -101,4 +101,43 @@ export default class UsuariosControlador {
             res.status(500).json({ estado: false, mensaje: "Error al eliminar usuario" });
         }
     }
+
+    modificarPerfil = async (req, res) => {
+    try {
+        const usuario_id = req.user.usuario_id;
+        const foto = req.file ? req.file.filename : null;
+
+        const datos = {};
+
+        if (req.body.nombre && req.body.nombre.trim() !== "") datos.nombre = req.body.nombre;
+        if (req.body.apellido && req.body.apellido.trim() !== "") datos.apellido = req.body.apellido;
+        if (req.body.nombre_usuario && req.body.nombre_usuario.trim() !== "") datos.nombre_usuario = req.body.nombre_usuario;
+        if (req.body.celular && req.body.celular.trim() !== "") datos.celular = req.body.celular;
+
+        if (foto) datos.foto = foto;
+
+        await this.servicio.actualizarPerfil(usuario_id, datos);
+
+        return res.status(200).json({
+            estado: true,
+            mensaje: "Perfil actualizado correctamente",
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            estado: false,
+            mensaje: "Error al actualizar perfil",
+        });
+    }
+}
+
+
+
+    
+
+
+
+
+
 }

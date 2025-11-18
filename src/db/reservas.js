@@ -161,4 +161,18 @@ export default class Reservas {
         const [res] = await conexion.query(sql, [reserva_id]);
         return res[0];
     }
+    
+
+    async buscarDatosReporteCsv() {
+        const sql = `CALL reporte_csv();`;
+        const [result] = await conexion.query(sql);
+        return result[0];
+    }
+
+    async estadisticas() {
+    const sql = `CALL estadisticas_reservas();`;
+    const [result] = await conexion.query(sql);
+    return result[0];  // Siempre el primer result set
+    }
+
     }

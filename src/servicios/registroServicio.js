@@ -2,7 +2,7 @@ import { conexion } from "../db/conexion.js";
 import md5 from "md5";
 
     export default class RegistroServicio {
-    async registrarCliente(datos) {
+    async registrar(datos) {
         const { nombre, apellido, nombre_usuario, contrasenia } = datos;
 
 

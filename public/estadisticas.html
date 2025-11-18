@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>📊 Estadísticas de Reservas</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #7b2ff7, #1a1aff);
+            font-family: "Poppins", sans-serif;
+            padding: 30px;
+            color: #181818;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e4e8ec;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .resumen-box {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .resumen-item {
+            background: #ecf0f1;
+            padding: 15px;
+            flex: 1;
+            text-align: center;
+            margin: 5px;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        #error {
+            text-align: center;
+            color: red;
+            font-size: 15px;
+            margin-top: 20px;
+        }
+
+        canvas {
+            margin: 25px auto;
+            max-width: 850px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📈 Estadísticas de Reservas</h1>
+
+    <div id="error"></div>
+
+    <div id="contenido" style="display:none;">
+
+        <div class="card">
+            <h3>📌 Resumen general</h3>
+
+            <div class="resumen-box">
+                <div class="resumen-item">
+                    Total de reservas:  
+                    <span id="total-reservas">0</span>
+                </div>
+
+    
+
+                <div class="resumen-item">
+                    Total recaudado:  
+                    $<span id="total-recaudado">0</span>
+                </div>
+            </div>
+        </div>
+
+        <h3>📊Reservas por mes</h3>
+        <canvas id="graficoReservas"></canvas>
+
+        <h3>💰Total recaudado por mes</h3>
+        <canvas id="graficoRecaudado"></canvas>
+
+    </div>
+
+</div>
+
+<script>
+let chart1, chart2;
+
+async function cargar() {
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        document.getElementById("error").innerText =
+            " No hay token en el navegador. Ingrese por el login";
+        return;
+    }
+
+    const resp = await fetch("http://localhost:3000/api/v1/reservas/estadisticas", {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const json = await resp.json();
+
+    if (!json.estado) {
+        document.getElementById("error").innerText =
+            json.mensaje || "Error consultando estadísticas";
+        return;
+    }
+
+    document.getElementById("contenido").style.display = "block";
+
+    const datos = json.datos;
+
+    const meses = datos.map(d => d.mes);
+    const reservasMes = datos.map(d => Number(d.reservas_por_mes) || 0);
+    const totalRecaudadoMes = datos.map(d => Number(d.total_recaudado) || 0);
+
+    const totalReservas = reservasMes.reduce((a, b) => a + b, 0);
+    const totalRecaudado = totalRecaudadoMes.reduce((a, b) => a + b, 0);
+
+    document.getElementById("total-reservas").innerText = totalReservas;
+    document.getElementById("total-recaudado").innerText =
+        totalRecaudado.toLocaleString("es-AR");
+
+    if (chart1) chart1.destroy();
+    if (chart2) chart2.destroy();
+
+    // reseravs por mes, grafico
+    chart1 = new Chart(document.getElementById("graficoReservas"), {
+        type: "bar",
+        data: {
+            labels: meses,
+            datasets: [{
+                label: "Reservas por mes",
+                data: reservasMes,
+                backgroundColor: "rgba(52, 152, 219, 0.7)"
+            }]
+        }
+    });
+
+
+    
+    // total recaudacion,grafico
+    chart2 = new Chart(document.getElementById("graficoRecaudado"), {
+        type: "bar",
+        data: {
+            labels: meses,
+            datasets: [{
+                label: "Total recaudado ($)",
+                data: totalRecaudadoMes,
+                backgroundColor: "rgba(46, 204, 113, 0.7)"
+            }]
+        }
+    });
+}
+
+window.onload = cargar;
+</script>
+
+</body>
+</html>

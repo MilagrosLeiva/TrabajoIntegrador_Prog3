@@ -10,5 +10,6 @@ export default class UsuariosServicio {
     buscarPorId = (id) => this.usuarios.buscarPorId(id);
     crear = (datos) => this.usuarios.crear(datos);
     actualizar = (id, datos) => this.usuarios.actualizar(id, datos);
+    actualizarPerfil = (id, datos) => this.usuarios.actualizarPerfil(id, datos);
     eliminar = (id) => this.usuarios.eliminar(id);
 }

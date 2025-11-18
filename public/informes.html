@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de informes</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #7b2ff7, #1a1aff);
+            font-family: "Poppins", sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            background: #fff;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .botones {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        button {
+            padding: 12px 22px;
+            margin: 10px;
+            border: none;
+            font-size: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s ease;
+        }
+
+        .csv {
+            background-color: #27ae60;
+        }
+        .csv:hover {
+            background-color: #1e8449;
+        }
+
+        .pdf {
+            background-color: #c0392b;
+        }
+        .pdf:hover {
+            background-color: #922b21;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #777;
+            font-size: 12px;
+        }
+
+        #error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📊 Generador de Informes</h1>
+    <p>Descargá informes en formato <b>CSV</b> o <b>PDF</b>.</p>
+
+    <div id="error"></div>
+
+    <div class="botones">
+        <button class="csv" onclick="descargar('csv')">Descargar CSV</button>
+        <button class="pdf" onclick="descargar('pdf')">Descargar PDF</button>
+    </div>
+
+    <div class="footer">
+        • Panel de informes
+    </div>
+</div>
+
+<script>
+function descargar(formato) {
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        document.getElementById("error").innerText =
+            "No tenes token almacenado.Volve al login.";
+        return;
+    }
+
+    const url = "http://localhost:3000/api/v1/reservas/informe?formato=" + formato;
+
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    })
+    .then(res => {
+        if (!res.ok) {
+            document.getElementById("error").innerText = 
+                "Error " + res.status + ": revisá tus permisos.";
+            return null;
+        }
+        return res.blob();
+    })
+    .then(blob => {
+        if (!blob) return;
+
+        const enlace = document.createElement("a");
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = "informe." + formato;
+        enlace.click();
+    })
+    .catch(err => {
+        console.error("Error al descargar:", err);
+        document.getElementById("error").innerText =
+            "Hubo un problema descargando el informe.";
+    });
+}
+</script>
+
+</body>
+</html>

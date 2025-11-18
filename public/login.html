@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Sesión</title>
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #7b2ff7, #1a1aff);
+            font-family: "Poppins", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .form-container {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            width: 320px;
+            text-align: center;
+            backdrop-filter: blur(6px);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            text-align: left;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #fff;
+            color: #5a1aff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: #d6c2f6;
+        }
+
+        .mensaje {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        #btn-estadisticas {
+            background-color: #f1f0f4;
+            margin-top: 20px;
+        }
+
+        #btn-estadisticas:hover {
+            background-color: #d9c4f0;
+        }
+        
+        #btn-informes {
+            background-color: #f1f0f4;
+            margin-top: 20px;
+        }
+
+        #btn-informes:hover {
+            background-color: #bfb5f2;
+        }
+
+
+        #btn-perfil {
+            background-color: #f1f0f4;
+            margin-top: 20px;
+        }
+
+        #btn-perfil:hover {
+            background-color: #bfb5f2;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="form-container">
+        <h2>Iniciar Sesion</h2>
+
+        <form id="formLogin">
+            <label>Usuario (email):</label>
+            <input type="text" name="nombre_usuario" required />
+
+            <label>Contraseña:</label>
+            <input type="password" name="contrasenia" required />
+
+            <button type="submit">Ingresar</button>
+        </form>
+
+        <div class="mensaje" id="mensaje"></div>
+
+        
+        <button id="btn-estadisticas" style="display:none;"
+            onclick="location.href='estadisticas.html'">
+        Ver estadísticas
+        </button>
+
+        <button id="btn-informes" style="display:none;"
+                onclick="location.href='informes.html'">
+            Ver informes
+        </button>
+
+
+        <button id="btn-perfil" style="display:none;"
+                onclick="location.href='perfil.html'">
+            Modificar perfil
+        </button>
+
+    </div>
+
+<script>
+
+
+
+
+
+function decodificarJWT(token) {
+    try {
+        const payloadBase64 = token.split(".")[1];
+        const payloadJson = atob(payloadBase64);
+        return JSON.parse(payloadJson);
+    } catch (e) {
+        console.error("Error decodificando token:", e);
+        return null;
+    }
+}
+
+
+document.getElementById("formLogin").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const datos = Object.fromEntries(new FormData(e.target));
+
+    const respuesta = await fetch("http://localhost:3000/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datos),
+    });
+
+    const resultado = await respuesta.json();
+    const msg = document.getElementById("mensaje");
+
+    if (!resultado.estado) {
+        msg.textContent = resultado.mensaje;
+        msg.style.color = "#ff8080";
+        return;
+    }
+
+    msg.textContent = "Ingreso correcto";
+    msg.style.color = "#90ee90";
+
+    localStorage.setItem("token", resultado.token);
+
+    const info = decodificarJWT(resultado.token);
+
+    if (!info) {
+        msg.textContent = "Error leyendo los datos del usuario";
+        msg.style.color = "#ff8080";
+        return;
+    }
+
+
+    if (info.tipo_usuario === 1) {
+        document.getElementById("btn-estadisticas").style.display = "block";
+        document.getElementById("btn-informes").style.display = "block";
+
+    }
+
+    document.getElementById("btn-perfil").style.display = "block";
+});
+</script>
+
+</body>
+</html>

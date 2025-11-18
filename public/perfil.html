@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Perfil</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #7b2ff7, #1a1aff);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .form-container {
+            background: rgba(255,255,255,0.15);
+            width: 350px;
+            padding: 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(6px);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #e6e6e6;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #fff;
+            color: #5a1aff;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #d6c2f6;
+        }
+
+        .mensaje {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="form-container">
+    <h2>Editar Perfil</h2>
+
+    <form id="formPerfil" enctype="multipart/form-data">
+
+        <label>Nombre:</label>
+        <input type="text" id="nombre" name="nombre">
+
+        <label>Apellido:</label>
+        <input type="text" id="apellido" name="apellido">
+
+        <label>Usuario (login):</label>
+        <input type="text" id="nombre_usuario" name="nombre_usuario">
+
+        <label>Celular:</label>
+        <input type="text" id="celular" name="celular">
+
+        <label>Foto (opcional):</label>
+        <input type="file" id="foto" name="foto" accept="image/*">
+
+        <button type="submit">Guardar Cambios</button>
+
+    </form>
+
+    <div class="mensaje" id="mensaje"></div>
+</div>
+
+
+<script>
+
+// SOLO enviar actualización, sin cargar datos
+document.getElementById("formPerfil").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token"); // usa localStorage como dijiste
+
+    if (!token) {
+        alert("No estás logueado.");
+        return;
+    }
+
+    const formData = new FormData(document.getElementById("formPerfil"));
+
+    const resp = await fetch("/api/v1/usuarios/modificarPerfil", {
+        method: "PUT",
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        body: formData
+    });
+
+    const json = await resp.json();
+
+    const msg = document.getElementById("mensaje");
+    msg.innerText = json.mensaje;
+    msg.style.color = json.estado ? "#90ee90" : "#ff8080";
+});
+
+</script>
+
+</body>
+</html>
